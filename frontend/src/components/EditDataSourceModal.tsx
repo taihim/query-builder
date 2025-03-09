@@ -95,6 +95,13 @@ export const EditDataSourceModal: React.FC<EditDataSourceModalProps> = ({
     
     if (!dataSource) return;
     
+    // Validate port is within valid range
+    const portNum = parseInt(port, 10);
+    if (isNaN(portNum) || portNum < 1 || portNum > 65535) {
+      setErrorMessage('Port must be a number between 1 and 65535');
+      return;
+    }
+    
     try {
       setIsLoading(true);
       setErrorMessage('');
@@ -204,10 +211,13 @@ export const EditDataSourceModal: React.FC<EditDataSourceModalProps> = ({
               <Label htmlFor="port">Port</Label>
               <Input
                 id="port"
+                type="number"
                 placeholder="5432"
                 value={port}
                 onChange={(e) => setPort(e.target.value)}
-                className="mt-1"
+                className="mt-1 hide-spinners"
+                min="1"
+                max="65535"
                 required
               />
             </div>

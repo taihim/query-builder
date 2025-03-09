@@ -40,6 +40,17 @@ export const AddDataSourceModal: React.FC<AddDataSourceModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate port is within valid range
+    const portNum = parseInt(port, 10);
+    if (isNaN(portNum) || portNum < 1 || portNum > 65535) {
+      setTestResult({
+        success: false,
+        message: 'Port must be a number between 1 and 65535'
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
     // Trim all input values before submission
@@ -189,9 +200,13 @@ export const AddDataSourceModal: React.FC<AddDataSourceModalProps> = ({
               <Label htmlFor="port">Port</Label>
               <Input
                 id="port"
+                type="number"
                 placeholder="5432"
                 value={port}
                 onChange={(e) => setPort(e.target.value)}
+                className="hide-spinners"
+                min="1"
+                max="65535"
                 required
               />
             </div>

@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { EditDataSourceModal } from './components/EditDataSourceModal';
+import './styles/custom.css';
 
 const App: React.FC = () => {
   const [dataSources, setDataSources] = useState<DataSource[]>([]);

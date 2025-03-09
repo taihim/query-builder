@@ -1,0 +1,11 @@
+/* Hide number input spinners */
+.hide-spinners::-webkit-outer-spin-button,
+.hide-spinners::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* For Firefox */
+.hide-spinners {
+  -moz-appearance: textfield;
+} 
