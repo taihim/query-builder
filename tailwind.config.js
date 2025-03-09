@@ -1,9 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  // ...your existing config
   theme: {
     extend: {
-      // ...your existing extensions
       keyframes: {
         shake: {
           '0%, 100%': { transform: 'translateX(0)' },

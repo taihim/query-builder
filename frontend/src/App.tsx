@@ -17,7 +17,6 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   
-  // Query state
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [selectedColumns, setSelectedColumns] = useState<TableColumn[]>([]);
   
