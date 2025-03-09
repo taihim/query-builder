@@ -38,13 +38,18 @@ Frontend and backend monorepo for queryBuilder app
    docker-compose up -d
 
    The database container will automatically start the initialization scripts. It might take some time for the database to be ready.
+   The scripts should prepare 3 sample databases:
+   - query-tool
+   - analytics
+   - ecommerce
 
+   They can all be accessed at host mysql with port 3306.
+   For the sake of simplicity, the root user credentials can be used (username: root, password: rootpassword)
    ```
 
 3. **Access the application:**
    - Frontend: http://localhost
    - API: http://localhost:3000
-   - MySQL Database: localhost:3306 (username: admin, password: admin123)
 
 4. **Stop the application:**
    ```bash
