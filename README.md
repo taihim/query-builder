@@ -36,6 +36,9 @@ Frontend and backend monorepo for queryBuilder app
 
    # Start all services
    docker-compose up -d
+
+   The database container will automatically start the initialization scripts. It might take some time for the database to be ready.
+
    ```
 
 3. **Access the application:**
