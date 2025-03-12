@@ -754,7 +754,7 @@ const QueryResults: React.FC<QueryResultsProps> = ({ dataSourceId, tableName, co
     return (
       <div key={`timeseries-${dateColumn}-${numericColumn}`} className="border rounded-lg p-4 bg-white">
         <h4 className="text-sm font-medium mb-4">Time Series: {dateColumn} vs {numericColumn}</h4>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={400}>
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis 
@@ -829,7 +829,7 @@ const QueryResults: React.FC<QueryResultsProps> = ({ dataSourceId, tableName, co
     return (
       <div key={`bar-${columnKey}`} className="border rounded-lg p-4 bg-white">
         <h4 className="text-sm font-medium mb-4">Bar Chart: {columnKey}</h4>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={400}>
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
@@ -861,7 +861,7 @@ const QueryResults: React.FC<QueryResultsProps> = ({ dataSourceId, tableName, co
     return (
       <div key={`line-${columnKey}`} className="border rounded-lg p-4 bg-white">
         <h4 className="text-sm font-medium mb-4">Line Chart: {columnKey}</h4>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={400}>
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="index" />
@@ -883,14 +883,17 @@ const QueryResults: React.FC<QueryResultsProps> = ({ dataSourceId, tableName, co
     return (
       <div key={`pie-${columnKey}`} className="border rounded-lg p-4 bg-white">
         <h4 className="text-sm font-medium mb-4">Pie Chart: {columnKey}</h4>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={400}>
           <PieChart>
             <Pie
               data={chartData}
               cx="50%"
               cy="50%"
-              labelLine={false}
-              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+              labelLine={true}
+              label={({percent}) => {
+                // Always show the percentage, but truncate the name if needed
+                return `${(percent * 100).toFixed(0)}%`;
+              }}
               outerRadius={80}
               fill="#8884d8"
               dataKey="value"
@@ -899,7 +902,7 @@ const QueryResults: React.FC<QueryResultsProps> = ({ dataSourceId, tableName, co
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip />
+            <Tooltip formatter={(value, name) => [value, name]} />
             <Legend />
           </PieChart>
         </ResponsiveContainer>
