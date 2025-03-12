@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { DataSourceModel } from '../models/dataSourceModel';
-import { createDataSourceConnection } from '../db';
+import { createDataSourceConnection, DataSource } from '../db';
 
 export class DataSourceController {
   /**
@@ -32,8 +32,8 @@ export class DataSourceController {
     
     try {
       const connection = await createDataSourceConnection({
-        host, port, username, password, database_name
-      });
+        type, host, port, username, password, database_name
+      } as DataSource);
       
       await connection.ping();
       await connection.end();
@@ -63,14 +63,14 @@ export class DataSourceController {
     try {
       // Test the connection first
       const connection = await createDataSourceConnection({
-        host, port, username, password, database_name
-      });
+        type, host, port, username, password, database_name
+      } as DataSource);
       await connection.end();
       
       // Create the data source
       const newDataSource = await DataSourceModel.createDataSource({
         name, type, host, port, database_name, username, password
-      });
+      } as DataSource);
       
       res.status(201).json(newDataSource);
     } catch (error) {
@@ -100,7 +100,7 @@ export class DataSourceController {
         // Create new data source
         const newDataSource = await DataSourceModel.createDataSource({
           name, type, host, port, database_name, username, password
-        });
+        } as DataSource);
         
         res.status(201).json(newDataSource);
         return;
@@ -109,7 +109,7 @@ export class DataSourceController {
       // Update existing data source
       const updatedDataSource = await DataSourceModel.updateDataSource(id, {
         name, type, host, port, database_name, username, password
-      });
+      } as DataSource);
       
       res.json(updatedDataSource);
     } catch (error) {

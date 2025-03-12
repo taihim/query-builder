@@ -1,4 +1,4 @@
-export type DataSourceType = 'mysql' | 'postgres' | 'sqlite';
+export type DataSourceType = 'mysql' | 'postgres' | 'sqlite' | 'mssql';
 
 export interface DataSource {
   id: string;

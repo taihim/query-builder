@@ -167,9 +167,8 @@ export const AddDataSourceModal: React.FC<AddDataSourceModalProps> = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="mysql">MySQL</SelectItem>
-                <SelectItem value="postgres">PostgreSQL</SelectItem>
-                <SelectItem value="sqlite">SQLite</SelectItem>
-              </SelectContent>
+                <SelectItem value="mssql">MSSQL</SelectItem>
+              </SelectContent>1
             </Select>
           </div>
           

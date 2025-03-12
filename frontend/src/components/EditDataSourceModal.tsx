@@ -180,6 +180,7 @@ export const EditDataSourceModal: React.FC<EditDataSourceModalProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="mysql">MySQL</SelectItem>
+                  <SelectItem value="mssql">SQL Server</SelectItem>
                 </SelectContent>
               </Select>
             </div>

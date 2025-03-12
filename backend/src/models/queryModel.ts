@@ -60,11 +60,21 @@ export class QueryModel {
       // Prepare column names
       const columnsString = columns.map(col => {
         const colName = typeof col === 'string' ? col : col.name;
-        return `${tableName}.${colName}`;
+        return dataSource.type === 'mssql' ? 
+          `[${tableName}].[${colName}]` : 
+          `${tableName}.${colName}`;
       }).join(', ');
       
       // Build query and params
-      let query = `SELECT ${columnsString} FROM ${tableName}`;
+      let query = `SELECT ${columnsString} FROM `;
+      
+      // Add table name with appropriate quoting
+      if (dataSource.type === 'mssql') {
+        query += `[${tableName}]`;
+      } else {
+        query += `${tableName}`;
+      }
+      
       const queryParams: any[] = [];
       
       // Add filters
@@ -72,29 +82,38 @@ export class QueryModel {
       
       Object.entries(filters).forEach(([column, filter]) => {
         if (filter.value) {
+          const columnRef = dataSource.type === 'mssql' ? 
+            `[${tableName}].[${column}]` : 
+            `${tableName}.${column}`;
+            
           switch (filter.operator) {
             case 'equals':
-              filterClauses.push(`${tableName}.${column} = ?`);
+              filterClauses.push(`${columnRef} = ?`);
               queryParams.push(filter.value);
               break;
             case 'contains':
-              filterClauses.push(`${tableName}.${column} LIKE ?`);
-              queryParams.push(`%${filter.value}%`);
+              if (dataSource.type === 'mssql') {
+                filterClauses.push(`${columnRef} LIKE ?`);
+                queryParams.push(`%${filter.value}%`);
+              } else {
+                filterClauses.push(`${columnRef} LIKE ?`);
+                queryParams.push(`%${filter.value}%`);
+              }
               break;
             case 'startsWith':
-              filterClauses.push(`${tableName}.${column} LIKE ?`);
+              filterClauses.push(`${columnRef} LIKE ?`);
               queryParams.push(`${filter.value}%`);
               break;
             case 'endsWith':
-              filterClauses.push(`${tableName}.${column} LIKE ?`);
+              filterClauses.push(`${columnRef} LIKE ?`);
               queryParams.push(`%${filter.value}`);
               break;
             case 'greaterThan':
-              filterClauses.push(`${tableName}.${column} > ?`);
+              filterClauses.push(`${columnRef} > ?`);
               queryParams.push(filter.value);
               break;
             case 'lessThan':
-              filterClauses.push(`${tableName}.${column} < ?`);
+              filterClauses.push(`${columnRef} < ?`);
               queryParams.push(filter.value);
               break;
           }
@@ -107,23 +126,47 @@ export class QueryModel {
       
       // Add sorting
       if (sortColumn && (sortDirection === 'asc' || sortDirection === 'desc')) {
-        query += ` ORDER BY ${tableName}.${sortColumn} ${sortDirection}`;
+        const columnRef = dataSource.type === 'mssql' ? 
+          `[${tableName}].[${sortColumn}]` : 
+          `${tableName}.${sortColumn}`;
+        query += ` ORDER BY ${columnRef} ${sortDirection}`;
+      } else if (dataSource.type === 'mssql' && !noLimit) {
+        // MSSQL requires ORDER BY for OFFSET/FETCH
+        const firstColumn = typeof columns[0] === 'string' ? columns[0] : columns[0].name;
+        const columnRef = `[${tableName}].[${firstColumn}]`;
+        query += ` ORDER BY ${columnRef}`;
       }
       
       // Get total count for pagination
-      const countQuery = `SELECT COUNT(*) AS total FROM ${tableName}`;
+      let countQuery: string;
       
-      const [countResult] = await connection.query<RowDataPacket[]>(countQuery, queryParams);
-      const totalRows = (countResult[0] as RowDataPacket).total;
+      if (dataSource.type === 'mssql') {
+        countQuery = `SELECT COUNT(*) AS total FROM [${tableName}]`;
+      } else {
+        countQuery = `SELECT COUNT(*) AS total FROM ${tableName}`;
+      }
+      
+      if (filterClauses.length > 0) {
+        countQuery += ` WHERE ${filterClauses.join(' AND ')}`;
+      }
+      
+      const [countResult] = await connection.query(countQuery, queryParams);
+      const totalRows = (countResult[0] as any).total;
       
       // Add pagination
       if (!noLimit) {
-        query += ` LIMIT ? OFFSET ?`;
-        queryParams.push(pageSize, (page - 1) * pageSize);
+        if (dataSource.type === 'mssql') {
+          // MSSQL uses OFFSET/FETCH NEXT syntax
+          query += ` OFFSET ${(page - 1) * pageSize} ROWS FETCH NEXT ${pageSize} ROWS ONLY`;
+        } else {
+          // MySQL uses LIMIT/OFFSET
+          query += ` LIMIT ? OFFSET ?`;
+          queryParams.push(pageSize, (page - 1) * pageSize);
+        }
       }
       
       // Execute query
-      const [rows] = await connection.query<RowDataPacket[]>(query, queryParams);
+      const [rows] = await connection.query(query, queryParams);
       
       return {
         rows: rows as any[],

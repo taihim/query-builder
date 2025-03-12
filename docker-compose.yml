@@ -31,6 +31,7 @@ services:
       - DB_NAME=${MYSQL_DATABASE}
     depends_on:
       - mysql
+      - mssql
     networks:
       - app-network
     restart: unless-stopped
@@ -52,10 +53,35 @@ services:
     restart: unless-stopped
     command: --default-authentication-plugin=mysql_native_password
 
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${MSSQL_SA_PASSWORD:-StrongP@ssw0rd!}
+      - MSSQL_PID=Express
+      - MSSQL_ENCRYPT=OPTIONAL
+      - MSSQL_TRUST_SERVER_CERTIFICATE=true
+    volumes:
+      - mssql-data:/var/opt/mssql
+      - ./mssql/init:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$$SA_PASSWORD" -Q "SELECT 1" -b
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
 networks:
   app-network:
     driver: bridge
 
 volumes:
   mysql-data:
+    driver: local
+  mssql-data:
     driver: local 

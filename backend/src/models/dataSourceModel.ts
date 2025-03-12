@@ -1,18 +1,5 @@
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
-import { appPool } from '../db';
-
-export interface DataSource {
-  id?: number;
-  name: string;
-  type: string;
-  host: string;
-  port: number;
-  database_name: string;
-  username: string;
-  password?: string;
-  created_at?: Date;
-  updated_at?: Date;
-}
+import { appPool, DataSource } from '../db';
 
 export interface DataSourceCredentials {
   host: string;
