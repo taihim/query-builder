@@ -5,7 +5,7 @@ export interface DataSource {
   host: string;
   port: number;
   username: string;
-  password: string;
+  password?: string;
   database_name: string;
 }
 
@@ -22,13 +22,16 @@ const appPool: Pool = mysql.createPool({
 });
 
 // Function to create a connection to a user-defined data source
-async function createDataSourceConnection(dataSource: DataSource): Promise<Connection> {
+export async function createDataSourceConnection(dataSource: DataSource): Promise<Connection> {
+  // Ensure password is provided, use empty string as fallback if undefined
+  const password = dataSource.password ?? '';
+  
   try {
     return await mysql.createConnection({
       host: dataSource.host,
       port: Number(dataSource.port),
       user: dataSource.username,
-      password: dataSource.password,
+      password: password,
       database: dataSource.database_name
     });
   } catch (error) {
@@ -39,5 +42,4 @@ async function createDataSourceConnection(dataSource: DataSource): Promise<Conne
 
 export {
   appPool,
-  createDataSourceConnection
 }; 
