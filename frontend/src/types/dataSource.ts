@@ -1,15 +1,17 @@
-export type DataSourceType = 'postgres' | 'mysql' | 'mongodb' | 'sqlite' | 'oracle';
+export type DataSourceType = 'mysql' | 'postgres' | 'sqlite';
 
 export interface DataSource {
   id: string;
   name: string;
   type: DataSourceType;
-  host?: string;
-  lastConnected?: Date;
-  port?: number;
-  database?: string;
-  username?: string;
+  host: string;
+  port?: number | string;
+  database: string;
+  username: string;
   password?: string;
+  created_at?: string;
+  updated_at?: string;
+  lastConnected?: Date;
 }
 
 export interface TableColumn {
