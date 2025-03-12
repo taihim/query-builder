@@ -1,27 +1,37 @@
 import React from 'react';
-import { Database, Plus } from 'lucide-react';
-import { Button } from './ui/button';
+import { motion } from 'framer-motion';
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 interface EmptyStateProps {
-  onAddDataSource: () => void;
+  onAddClick: () => void;
 }
 
-export const EmptyState: React.FC<EmptyStateProps> = ({ onAddDataSource }) => {
+export const EmptyState: React.FC<EmptyStateProps> = ({ onAddClick }) => {
   return (
-    <div className="flex h-[calc(100vh-4rem)] flex-col items-center justify-center bg-white">
-      <div className="flex flex-col items-center rounded-lg border border-border bg-card p-8 shadow-sm">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-          <Database className="h-8 w-8" />
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)]">
+        <div className="text-center space-y-6 p-8">
+          <h2 className="text-2xl font-semibold">No Data Sources</h2>
+          <p className="text-muted-foreground max-w-md mx-auto">
+            Connect to a database to get started building queries
+          </p>
+          <div className="relative mt-8 inline-block">
+            <Button 
+              onClick={onAddClick}
+              size="lg"
+              className="relative z-10"
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              Add Your First Data Source
+            </Button>
+          </div>
         </div>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">No data sources found</h2>
-        <p className="mb-6 mt-2 text-center text-muted-foreground">
-          Get started by adding your first database connection
-        </p>
-        <Button onClick={onAddDataSource} className="animate-bounce">
-          <Plus className="mr-2 h-4 w-4" />
-          Add new data source
-        </Button>
       </div>
-    </div>
+    </motion.div>
   );
 }; 

@@ -39,13 +39,13 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center border-b bg-background px-4 lg:px-6">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="w-full flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
           <Database className="h-6 w-6 text-primary" />
           <h1 className="text-xl font-bold text-primary">QueryBuilder</h1>
         </div>
 
-        <div className="ml-auto">
+        <div>
           {dataSources.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
