@@ -36,9 +36,17 @@ export const useQueryState = (selectedDataSource: DataSource | null) => {
     localStorage.setItem('selectedColumns', JSON.stringify(columns));
   };
 
+  const handleSelectTable = (tableName: string) => {
+    setSelectedTable(tableName);
+    setSelectedColumns([]);
+    localStorage.setItem('selectedTable', tableName);
+    localStorage.removeItem('selectedColumns');
+  };
+
   return {
     selectedTable,
     selectedColumns,
-    handleSelectColumns
+    handleSelectColumns,
+    handleSelectTable
   };
 }; 

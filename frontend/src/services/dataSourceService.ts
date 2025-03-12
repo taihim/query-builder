@@ -1,7 +1,6 @@
 import { DataSource, DataSourceType } from '../types/dataSource';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
-console.log("from data source service", API_BASE_URL);
 export const getDataSources = async (): Promise<DataSource[]> => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/datasources`);
@@ -16,8 +15,11 @@ export const getDataSources = async (): Promise<DataSource[]> => {
       id: source.id.toString(),
       name: source.name,
       type: source.type as DataSourceType,
-      host: `${source.host}:${source.port}`,
-      lastConnected: new Date(source.created_at)
+      host: source.host,
+      port: source.port,
+      database: source.database_name,
+      username: source.username,
+      created_at: source.created_at
     }));
   } catch (error) {
     console.error('Error in getDataSources:', error);
@@ -62,8 +64,11 @@ export const addDataSource = async (
       id: data.id.toString(),
       name: data.name,
       type: data.type as DataSourceType,
-      host: `${data.host}:${data.port}`,
-      lastConnected: new Date(data.created_at)
+      host: data.host,
+      port: data.port,
+      database: data.database_name,
+      username: data.username,
+      created_at: data.created_at
     };
   } catch (error) {
     console.error('Error in addDataSource:', error);

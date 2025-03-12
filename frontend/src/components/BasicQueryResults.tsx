@@ -57,11 +57,13 @@ const QueryResults: React.FC<QueryResultsProps> = ({ dataSourceId, tableName, co
   const [selectedChartTypes, setSelectedChartTypes] = useState<Record<string, string>>({});
   const [chartOptionsExpanded, setChartOptionsExpanded] = useState(true);
 
+  // Generate a unique key for this query's filter state in localStorage
   const storageKey = useMemo(() => 
     `queryFilters-${dataSourceId}-${tableName}`, 
     [dataSourceId, tableName]
   );
   
+  // Step 1: Load filters FIRST, before any data fetching happens
   useEffect(() => {
     try {
       const savedState = localStorage.getItem(storageKey);

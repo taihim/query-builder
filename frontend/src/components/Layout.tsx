@@ -28,7 +28,6 @@ export const Layout: React.FC<LayoutProps> = ({
       const savedState = localStorage.getItem('sidebarCollapsed');
       if (savedState !== null) {
         setIsSidebarCollapsed(JSON.parse(savedState));
-        console.log('Loaded sidebar state:', JSON.parse(savedState));
       }
     } catch (error) {
       console.error('Error loading sidebar state:', error);
@@ -38,7 +37,6 @@ export const Layout: React.FC<LayoutProps> = ({
   // Save sidebar state whenever it changes
   useEffect(() => {
     try {
-      console.log('Saving sidebar state:', isSidebarCollapsed);
       localStorage.setItem('sidebarCollapsed', JSON.stringify(isSidebarCollapsed));
     } catch (error) {
       console.error('Error saving sidebar state:', error);

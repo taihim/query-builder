@@ -6,6 +6,8 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { DataSourceType } from '@/types/dataSource';
+import { testDataSourceConnection } from '@/services/dataSourceService';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 interface AddDataSourceModalProps {
   open: boolean;
@@ -26,7 +28,6 @@ export const AddDataSourceModal: React.FC<AddDataSourceModalProps> = ({
   const [db_password, setPwd] = useState('');
   const [database, setDatabase] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isTestingConnection, setIsTestingConnection] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   // Reset test result and form when modal opens/closes
@@ -38,7 +39,7 @@ export const AddDataSourceModal: React.FC<AddDataSourceModalProps> = ({
     }
   }, [open]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate port is within valid range
@@ -52,31 +53,64 @@ export const AddDataSourceModal: React.FC<AddDataSourceModalProps> = ({
     }
     
     setIsSubmitting(true);
+    setTestResult(null);
     
-    // Trim all input values before submission
-    const trimmedName = name.trim();
-    const trimmedHost = host.trim();
-    const trimmedPort = port.trim();
-    const trimmedDatabase = database.trim();
-    const trimmedUser = db_user.trim();
-    const trimmedPassword = db_password.trim();
-    
-    onAddDataSource(
-      trimmedName,
-      dataSourceType,
-      trimmedHost,
-      trimmedPort,
-      trimmedDatabase,
-      trimmedUser,
-      trimmedPassword
-    );
-    
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // First test connection before saving
+      const isConnected = await testDataSourceConnection(
+        dataSourceType,
+        host,
+        port,
+        database,
+        db_user,
+        db_password
+      );
+      
+      if (!isConnected) {
+        setTestResult({
+          success: false,
+          message: 'Connection failed. Please check your database credentials and try again.'
+        });
+        setIsSubmitting(false);
+        return;
+      }
+      
+      // Connection successful, proceed with adding
+      setTestResult({
+        success: true,
+        message: 'Connection successful! Adding data source...'
+      });
+      
+      await onAddDataSource(
+        name, 
+        dataSourceType, 
+        host, 
+        port, 
+        database, 
+        db_user, 
+        db_password
+      );
+      
+      // Show success message briefly before closing
+      setTestResult({
+        success: true,
+        message: 'Data source added successfully!'
+      });
+      
+      // Close the modal after a delay
+      setTimeout(() => {
+        resetForm();
+        onOpenChange(false);
+      }, 1500);
+      
+    } catch (error) {
+      setTestResult({
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to add data source'
+      });
+    } finally {
       setIsSubmitting(false);
-      resetForm();
-      onOpenChange(false);
-    }, 500);
+    }
   };
 
   const resetForm = () => {
@@ -87,60 +121,15 @@ export const AddDataSourceModal: React.FC<AddDataSourceModalProps> = ({
     setUser('');
     setPwd('');
     setDatabase('');
+    setTestResult(null);
   };
 
-  const testConnection = async () => {
-    // Trim all input values before testing
-    const trimmedHost = host.trim();
-    const trimmedPort = port.trim();
-    const trimmedUser = db_user.trim();
-    const trimmedPassword = db_password.trim();
-    const trimmedDatabase = database.trim();
-    
-    if (!trimmedHost || !trimmedPort || !dataSourceType || !trimmedUser || !trimmedPassword || !trimmedDatabase) {
-      setTestResult({
-        success: false,
-        message: 'Please fill in all connection fields first'
-      });
-      return;
-    }
-    
-    try {
-      setIsTestingConnection(true);
-      setTestResult(null);
-      
-      const API_URL = import.meta.env.VITE_API_URL;
-      console.log(API_URL);
-      const response = await fetch(`${API_URL}/api/datasources/test-connection`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          type: dataSourceType,
-          host: trimmedHost,
-          port: trimmedPort,
-          username: trimmedUser,
-          password: trimmedPassword,
-          database_name: trimmedDatabase
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Server responded with status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      setTestResult(data);
-    } catch (error) {
-      setTestResult({
-        success: false,
-        message: `Request failed: ${(error as Error).message}`
-      });
-    } finally {
-      setIsTestingConnection(false);
-    }
-  };
+  const isFormValid = 
+    name.trim() !== '' && 
+    host.trim() !== '' && 
+    port.trim() !== '' && 
+    db_user.trim() !== '' && 
+    database.trim() !== '';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -177,10 +166,9 @@ export const AddDataSourceModal: React.FC<AddDataSourceModalProps> = ({
                 <SelectValue placeholder="Select Database Type" />
               </SelectTrigger>
               <SelectContent>
-              <SelectItem value="mysql">MySQL</SelectItem>
-                <SelectItem value="postgres">PostgreSQL</SelectItem>
-                <SelectItem value="sqlite">SQLite</SelectItem>
-              </SelectContent>
+                <SelectItem value="mysql">MySQL</SelectItem>
+                <SelectItem value="mssql">MSSQL</SelectItem>
+              </SelectContent>1
             </Select>
           </div>
           
@@ -201,7 +189,7 @@ export const AddDataSourceModal: React.FC<AddDataSourceModalProps> = ({
               <Input
                 id="port"
                 type="number"
-                placeholder="5432"
+                placeholder="3306"
                 value={port}
                 onChange={(e) => setPort(e.target.value)}
                 className="hide-spinners"
@@ -227,6 +215,7 @@ export const AddDataSourceModal: React.FC<AddDataSourceModalProps> = ({
               <Label htmlFor="db_pwd">Password</Label>
               <Input
                 id="db_pwd"
+                type="password"
                 placeholder="password"
                 value={db_password}
                 onChange={(e) => setPwd(e.target.value)}
@@ -245,45 +234,33 @@ export const AddDataSourceModal: React.FC<AddDataSourceModalProps> = ({
             />
           </div>
           
-          <div className="flex gap-4 mt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={testConnection}
-              disabled={isTestingConnection || isSubmitting}
-              className="flex-1"
-            >
-              {isTestingConnection ? (
-                <span className="flex items-center gap-1">
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  Testing...
-                </span>
-              ) : (
-                'Test Connection'
-              )}
-            </Button>
-            
-            <Button 
-              type="submit" 
-              disabled={isSubmitting || isTestingConnection}
-              className="flex-1"
-            >
-              {isSubmitting ? (
-                <span className="flex items-center gap-1">
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  Connecting...
-                </span>
-              ) : (
-                'Connect'
-              )}
-            </Button>
-          </div>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting || !isFormValid}
+            className="w-full"
+          >
+            {isSubmitting ? (
+              <span className="flex items-center justify-center gap-1">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Connecting...
+              </span>
+            ) : (
+              'Connect'
+            )}
+          </Button>
           
           {testResult && (
             <div className={`mt-4 p-3 rounded-md ${
               testResult.success ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
             }`}>
-              {testResult.message}
+              <div className="flex items-center gap-2">
+                {testResult.success ? (
+                  <CheckCircle2 className="h-4 w-4" />
+                ) : (
+                  <AlertCircle className="h-4 w-4" />
+                )}
+                {testResult.message}
+              </div>
             </div>
           )}
         </form>

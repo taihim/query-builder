@@ -4,7 +4,7 @@ USE querytool;
 CREATE TABLE data_sources (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
-  type ENUM('mysql', 'postgres', 'sqlite') NOT NULL,
+  type ENUM('mysql', 'postgres', 'sqlite', 'mssql') NOT NULL,
   host VARCHAR(255) NOT NULL,
   port INT NOT NULL,
   username VARCHAR(255) NOT NULL,
