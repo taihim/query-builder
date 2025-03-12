@@ -58,42 +58,43 @@ export class QueryModel {
     
     try {
       // Prepare column names
-      const columnNames = Array.isArray(columns) 
-        ? columns.map(col => typeof col === 'string' ? col : col.name)
-        : [columns];
+      const columnsString = columns.map(col => {
+        const colName = typeof col === 'string' ? col : col.name;
+        return `${tableName}.${colName}`;
+      }).join(', ');
       
       // Build query and params
-      let query = `SELECT ${columnNames.join(', ')} FROM ${tableName}`;
+      let query = `SELECT ${columnsString} FROM ${tableName}`;
       const queryParams: any[] = [];
       
       // Add filters
       const filterClauses: string[] = [];
       
-      Object.entries(filters).forEach(([columnName, filter]) => {
+      Object.entries(filters).forEach(([column, filter]) => {
         if (filter.value) {
           switch (filter.operator) {
             case 'equals':
-              filterClauses.push(`${columnName} = ?`);
+              filterClauses.push(`${tableName}.${column} = ?`);
               queryParams.push(filter.value);
               break;
             case 'contains':
-              filterClauses.push(`${columnName} LIKE ?`);
+              filterClauses.push(`${tableName}.${column} LIKE ?`);
               queryParams.push(`%${filter.value}%`);
               break;
             case 'startsWith':
-              filterClauses.push(`${columnName} LIKE ?`);
+              filterClauses.push(`${tableName}.${column} LIKE ?`);
               queryParams.push(`${filter.value}%`);
               break;
             case 'endsWith':
-              filterClauses.push(`${columnName} LIKE ?`);
+              filterClauses.push(`${tableName}.${column} LIKE ?`);
               queryParams.push(`%${filter.value}`);
               break;
             case 'greaterThan':
-              filterClauses.push(`${columnName} > ?`);
+              filterClauses.push(`${tableName}.${column} > ?`);
               queryParams.push(filter.value);
               break;
             case 'lessThan':
-              filterClauses.push(`${columnName} < ?`);
+              filterClauses.push(`${tableName}.${column} < ?`);
               queryParams.push(filter.value);
               break;
           }
@@ -106,13 +107,11 @@ export class QueryModel {
       
       // Add sorting
       if (sortColumn && (sortDirection === 'asc' || sortDirection === 'desc')) {
-        query += ` ORDER BY ${sortColumn} ${sortDirection.toUpperCase()}`;
+        query += ` ORDER BY ${tableName}.${sortColumn} ${sortDirection}`;
       }
       
       // Get total count for pagination
-      const countQuery = `SELECT COUNT(*) AS total FROM ${tableName}${
-        query.includes('WHERE') ? ` WHERE ${query.split('WHERE')[1].split('ORDER BY')[0]}` : ''
-      }`;
+      const countQuery = `SELECT COUNT(*) AS total FROM ${tableName}`;
       
       const [countResult] = await connection.query<RowDataPacket[]>(countQuery, queryParams);
       const totalRows = (countResult[0] as RowDataPacket).total;
