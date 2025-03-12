@@ -246,7 +246,7 @@ export const AddDataSourceModal: React.FC<AddDataSourceModalProps> = ({
                 Connecting...
               </span>
             ) : (
-              'Connect Database'
+              'Connect'
             )}
           </Button>
           

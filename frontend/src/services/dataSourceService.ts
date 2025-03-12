@@ -1,7 +1,6 @@
 import { DataSource, DataSourceType } from '../types/dataSource';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
-console.log("from data source service", API_BASE_URL);
 export const getDataSources = async (): Promise<DataSource[]> => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/datasources`);

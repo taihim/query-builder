@@ -49,6 +49,43 @@ CREATE TABLE IF NOT EXISTS order_items (
   FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
 
+-- Create Product Specifications table
+CREATE TABLE IF NOT EXISTS product_specifications (
+  spec_id INT AUTO_INCREMENT PRIMARY KEY,
+  product_id INT NOT NULL,
+  weight DECIMAL(10, 2),
+  dimensions VARCHAR(50),
+  color VARCHAR(30),
+  material VARCHAR(50),
+  warranty_period VARCHAR(30),
+  battery_life VARCHAR(30),
+  screen_size VARCHAR(30),
+  processor VARCHAR(50),
+  ram_size VARCHAR(30),
+  storage_capacity VARCHAR(30),
+  connectivity_options VARCHAR(100),
+  operating_system VARCHAR(50),
+  camera_resolution VARCHAR(30),
+  audio_features VARCHAR(100),
+  video_resolution VARCHAR(30),
+  release_date DATE,
+  brand VARCHAR(50),
+  model VARCHAR(50),
+  sku VARCHAR(50),
+  is_refurbished BOOLEAN DEFAULT FALSE,
+  is_featured BOOLEAN DEFAULT FALSE,
+  is_new BOOLEAN DEFAULT TRUE,
+  user_rating DECIMAL(3, 2),
+  review_count INT DEFAULT 0,
+  shipping_weight DECIMAL(10, 2),
+  shipping_dimensions VARCHAR(50),
+  country_of_origin VARCHAR(50),
+  energy_efficiency_rating VARCHAR(10),
+  safety_certifications VARCHAR(100),
+  compatibility VARCHAR(100),
+  FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+
 -- Insert sample data for Products
 INSERT INTO products (name, description, price, stock_quantity, category) VALUES
   ('Smartphone X', 'Latest generation smartphone with high-resolution camera', 899.99, 50, 'Electronics'),
@@ -92,6 +129,35 @@ INSERT INTO order_items (order_id, product_id, quantity, price_per_unit) VALUES
   (6, 6, 1, 69.99),
   (7, 5, 1, 199.99),
   (7, 10, 1, 29.99);
+
+-- Insert sample data for Product Specifications
+INSERT INTO product_specifications (
+  product_id, weight, dimensions, color, material, warranty_period, battery_life,
+  screen_size, processor, ram_size, storage_capacity, connectivity_options,
+  operating_system, camera_resolution, audio_features, video_resolution,
+  release_date, brand, model, sku, is_refurbished, is_featured, is_new,
+  user_rating, review_count, shipping_weight, shipping_dimensions,
+  country_of_origin, energy_efficiency_rating, safety_certifications,
+  compatibility
+) VALUES
+  (1, 0.200, '6.1 x 2.8 x 0.3 inches', 'Black', 'Aluminum', '1 Year', '24 hours',
+   '6.1 inches', 'A14 Bionic', '4GB', '128GB', 'Wi-Fi, Bluetooth',
+   'iOS', '12MP', 'Stereo Speakers', '4K',
+   '2021-09-14', 'Apple', 'iPhone 13', 'IP13-BLK-128', FALSE, TRUE, TRUE,
+   4.5, 150, 0.300, '7 x 3 x 1 inches', 'USA', 'A+', 'CE, FCC',
+   'Compatible with Qi chargers'),
+  (2, 1.500, '14 x 9.5 x 0.6 inches', 'Silver', 'Aluminum', '2 Years', '10 hours',
+   '15.6 inches', 'Intel i7', '16GB', '512GB SSD', 'Wi-Fi, Bluetooth',
+   'Windows 10', '720p', 'Dual Speakers', '1080p',
+   '2021-05-15', 'Dell', 'XPS 15', 'XPS15-SLV-512', FALSE, TRUE, TRUE,
+   4.7, 200, 2.000, '16 x 12 x 4 inches', 'China', 'A', 'UL',
+   'Compatible with Windows 10'),
+  (3, 0.800, '8 x 4 x 0.5 inches', 'White', 'Plastic', '1 Year', '12 hours',
+   '5.5 inches', 'Snapdragon 888', '8GB', '256GB', 'Wi-Fi, Bluetooth',
+   'Android', '48MP', 'Mono Speakers', '4K',
+   '2021-08-01', 'Samsung', 'Galaxy S21', 'GALAXY-S21-WHT-256', TRUE, FALSE, TRUE,
+   4.6, 100, 0.250, '6 x 3 x 1 inches', 'South Korea', 'A+', 'CE',
+   'Compatible with Android 11');
 
 -- Create a view for order summaries
 CREATE VIEW order_summary AS

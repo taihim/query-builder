@@ -12,6 +12,7 @@ export interface DataSource {
   created_at?: string;
   updated_at?: string;
   lastConnected?: Date;
+  tables?: DatabaseTable[];
 }
 
 export interface TableColumn {
